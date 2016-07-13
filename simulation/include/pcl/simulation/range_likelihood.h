@@ -99,6 +99,25 @@ namespace pcl
         }
         
         /**
+         * Get the basic camera intrinsic parameters
+         */
+        void
+        getCameraIntrinsicsParameters (int &camera_width_in,
+                                      int &camera_height_in,
+                                      float &camera_fx_in,
+                                      float &camera_fy_in,
+                                      float &camera_cx_in,
+                                      float &camera_cy_in)
+        {
+          camera_width_in = camera_width_;
+          camera_height_in = camera_height_;
+          camera_fx_in = camera_fx_;
+          camera_fy_in = camera_fy_;
+          camera_cx_in = camera_cx_;
+          camera_cy_in = camera_cy_;
+        }
+        
+        /**
          * Set the cost function to be used - one of 4 hard coded currently
          */
         void setCostFunction (int which_cost_function_in){  which_cost_function_ = which_cost_function_in;}
@@ -145,6 +164,18 @@ namespace pcl
         const float*
         getScoreBuffer ();
 
+        float 
+        getZNear(){ return z_near_; }
+        
+        float 
+        getZFar(){ return z_far_; }
+        
+        void 
+        setZNear(float z){ z_near_ = z; }
+        
+        void 
+        setZFar(float z){ z_far_ = z; }
+        
       private:
         /**
          * Evaluate the likelihood/score for a set of particles
