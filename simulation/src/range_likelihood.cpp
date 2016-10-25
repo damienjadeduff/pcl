@@ -650,7 +650,8 @@ pcl::simulation::RangeLikelihood::computeScores (float* reference,
 void
 pcl::simulation::RangeLikelihood::getPointCloud (pcl::PointCloud<pcl::PointXYZRGB>::Ptr pc,
   bool make_global,
-  const Eigen::Isometry3d & pose)
+  const Eigen::Isometry3d & pose,
+  bool organized)
 {
   // TODO: check if this works for for rows/cols >1  and for width&height != 640x480
   // i.e. multiple tiled images
@@ -669,7 +670,7 @@ pcl::simulation::RangeLikelihood::getPointCloud (pcl::PointCloud<pcl::PointXYZRG
   float camera_fy_reciprocal_ = 1.0f / camera_fy_;
   float zn = z_near_;
   float zf = z_far_;
-
+  
   const uint8_t* color_buffer = getColorBuffer();
 
   // TODO: support decimation
@@ -680,8 +681,12 @@ pcl::simulation::RangeLikelihood::getPointCloud (pcl::PointCloud<pcl::PointXYZRG
     for (int x = 0; x < col_width_ ; ++x)  // camera_width_
     {
       // Find XYZ from normalized 0->1 mapped disparity
-      int idx = points_added; // y*camera_width_ + x;
+      int idx;
+      if (organized) idx = y*col_width_ + x;
+      else idx = points_added; // y*camera_width_ + x;
+  
       float d = depth_buffer_[y*camera_width_ + x] ;
+      
       if (d < 1.0) // only add points with depth buffer less than max (20m) range
       {
         float z = zf*zn/((zf-zn)*(d - zf/(zf-zn)));
@@ -702,12 +707,25 @@ pcl::simulation::RangeLikelihood::getPointCloud (pcl::PointCloud<pcl::PointXYZRG
         pc->points[idx].r = color_buffer[rgb_idx*3]; // red
         points_added++;
       }
+      else if (organized)
+      {
+	pc->points[idx].z = std::numeric_limits<float>::quiet_NaN ();
+        pc->points[idx].x = std::numeric_limits<float>::quiet_NaN ();
+        pc->points[idx].y = std::numeric_limits<float>::quiet_NaN ();
+        pc->points[idx].b = 0;
+        pc->points[idx].g = 0;
+        pc->points[idx].r = 0;
+      }
     }
   }
-  pc->width    = 1;
-  pc->height   = points_added;
-  pc->points.resize (points_added);
-
+  
+  if (!organized)
+  {
+    pc->width    = 1;
+    pc->height   = points_added;
+    pc->points.resize (points_added);
+  }
+  
   if (make_global)
   {
     // Go from OpenGL to (Z-up, X-forward, Y-left)
