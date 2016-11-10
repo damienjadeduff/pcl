@@ -57,8 +57,9 @@ pcl::OrganizedConnectedComponentSegmentation<PointT, PointLT>::findLabeledRegion
   int curr_x   = start_idx % labels->width;
   int curr_y   = start_idx / labels->width;
   unsigned label = labels->points[start_idx].label;
+
   
-  // fill lookup table for next points to visit
+  // fill lookup table for next points to vist                                                                                               
   Neighbor directions [8] = {Neighbor(-1,  0,                 -1),
                              Neighbor(-1, -1, -labels->width - 1), 
                              Neighbor( 0, -1, -labels->width    ),
@@ -101,7 +102,7 @@ pcl::OrganizedConnectedComponentSegmentation<PointT, PointLT>::findLabeledRegion
       y = curr_y + directions [nIdx].d_y;
       index = curr_idx + directions [nIdx].d_index;
       if (x >= 0 && y < int(labels->width) && y >= 0 && y < int(labels->height) && labels->points[index].label == label)
-        break;
+        break; // mistake: on above if, the First y should be x
     }
     
     // update the direction
@@ -210,7 +211,8 @@ pcl::OrganizedConnectedComponentSegmentation<PointT, PointLT>::segment (pcl::Poi
   {
     // if it is its own root -> new region
     if (run_ids[runIdx] == runIdx)
-      map[runIdx] = max_id++;
+      map[runIdx] = max_id++; 
+
     else // assign this sub-segment to the region (root) it belongs
       map [runIdx] = map [findRoot (run_ids, runIdx)];
   }

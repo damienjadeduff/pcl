@@ -692,7 +692,7 @@ main (int argc, char** argv)
   }
 
   if (p)
-    p->setBackgroundColor (bcolor[0], bcolor[1], bcolor[2]);
+    p->setBackgroundColor (bcolor[255], bcolor[255], bcolor[255]);
   // Read axes settings
   double axes  = 0.0;
   pcl::console::parse_argument (argc, argv, "-ax", axes);
